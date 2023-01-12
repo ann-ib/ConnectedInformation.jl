@@ -100,8 +100,6 @@ function estimate_max_enthropy(ditributions_n::Int64, entropy_constraints::Dict{
             subset_union_index = subset_to_index[subset_union]
             subset_intersect_index = subset_to_index[subset_intersect]
             
-            # @show subset_C, subset_D, subset_C_index, subset_D_index
-            # @show subset_intersect, subset_union, subset_intersect_index, subset_union_index
             @constraint(model, h[subset_intersect_index] + h[subset_union_index] <= h[subset_C_index] + h[subset_D_index])
         end
     end
@@ -149,13 +147,6 @@ function _reduce_prob_table(probability_table::Array{Float64}, choosen_distribut
         return probability_table
     end
     distributions_to_drop = Tuple(setdiff((1:distributions_n), choosen_distributions))
-    # sizes = size(probability_table)[choosen_distributions]
-    # cur_prob_table = zeros(sizes)
-    # for i in eachindex(cur_prob_table)
-        # cur_sum_range = [Colon() for i=1:distributions_n]
-            
-    # end
-    # cur_prob_table = copy(probability_table) # or not copy as prob table is local?
     cur_prob_table = sum(probability_table, dims=distributions_to_drop)
     cur_prob_table = dropdims(cur_prob_table, dims=distributions_to_drop)
     return cur_prob_table
