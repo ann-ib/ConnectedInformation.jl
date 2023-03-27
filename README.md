@@ -2,7 +2,7 @@
 This project provides a way to compute the approximate connected information and entropy of any number of random distributions.
 
 ## Installation
-To instal version form git simply run
+To install a version from git simply run
 
 ```zsh
 julia>]
