@@ -14,17 +14,18 @@ using Test
         parity[2, 2, 2, 2] = 1/8
         entropies = caluclate_all_entropies(parity)
         
-
-        connected_information = estimate_connected_information(4, 4, entropies)
+        distr_cards = [2, 2, 2, 2]
+        connected_information = estimate_connected_information(4, distr_cards, entropies)
         @test isnan(connected_information[1])
         @test connected_information[2:end] ≈ [0.0, 0.0, 1.0]
+        @show(connected_information)
     end
 
     @testset "max entropy approximation" begin
+        distr_cards = [2, 2, 2, 2]
+
         one_dim_entropies = Dict{Vector{Int64}, Float64}([1] => 1, [2] => 1, [3] => 1, [4] => 1)
-
-
-        @test estimate_max_enthropy(4, one_dim_entropies) ≈ 4.0
+        @test estimate_max_enthropy(distr_cards, one_dim_entropies) ≈ 4.0
         
         parity = zeros(Float64, 2, 2, 2, 2)
         parity[1, 1, 1, 1] = 1/8
@@ -36,8 +37,7 @@ using Test
         parity[2, 2, 1, 1] = 1/8
         parity[2, 2, 2, 2] = 1/8
         parity_entropies = caluclate_all_entropies(parity)
-
-        @test estimate_max_enthropy(4, parity_entropies) == 3.0
+        @test estimate_max_enthropy(distr_cards, parity_entropies) == 3.0
     end
 
     @testset "calculation of all entropies" begin

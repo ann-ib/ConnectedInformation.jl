@@ -7,26 +7,25 @@ using Combinatorics
 
 export estimate_connected_information, estimate_max_enthropy, calculate_entropy, caluclate_all_entropies
 
-# TBD: Introduce Entropy structure
-
 
 """
-    estimate_connected_information(to_order::Int, 
-                                   ditributions_n::Int, 
+    estimate_connected_information(to_order::Int64, 
+                                   distrs_card::Vector{Int64}, 
                                    entropy_constraints::Dict{Vector{Int64}, Float64})
 
 Return vector with connected information approximation of order from 2 
 up to `to_order` for given entropies `entropy_constraints` characterizing
-`distributions_n` number of distributions.
+distributions with given `distrs_card` cardinalities.
+``
 
 # Example
 
 TBD
 """
 function estimate_connected_information(to_order::Int64, 
-                                        ditributions_n::Int64, 
+                                        distrs_card::Vector{Int64}, 
                                         entropy_constraints::Dict{Vector{Int64}, Float64})::Vector{Float64}
-    # TBD: Do to_order and ditributions_n arguments optional, calculate them by default from marginals dict
+    # TBD: make to_order argument optional, calculate it by default from marginals dict
 
     con_inf = Vector{Float64}(undef, to_order)
     entropies = Vector{Float64}(undef, to_order)
@@ -34,12 +33,12 @@ function estimate_connected_information(to_order::Int64,
 
     # Calculate maximum entropy approximation consistent with marginals of order 1 
     cur_constraints = filter(p -> (length(first(p))) <= 1, entropy_constraints)
-    entropies[1] = estimate_max_enthropy(ditributions_n, cur_constraints)
+    entropies[1] = estimate_max_enthropy(distrs_card, cur_constraints)
 
     # Calculate maximum entropy and connected informatoin approximations up to |to_order| order
     for i in 2:to_order
         cur_constraints = filter(p -> (length(first(p))) <= i, entropy_constraints)
-        entropies[i] = estimate_max_enthropy(ditributions_n, cur_constraints)
+        entropies[i] = estimate_max_enthropy(distrs_card, cur_constraints)
         # Approximation is not precise, entropy with more constraints could have smaller value
         if entropies[i] > entropies[i - 1]
             con_inf[i] = 0
@@ -53,18 +52,22 @@ end
 
 
 """
-    estimate_max_enthropy(ditributions_n::Int64, entropy_constraints::Dict{Vector{Int64}, Float64})
+    estimate_max_enthropy(distrs_card::Vector{<:Int64}, entropy_constraints::Dict{Vector{Int64}, Float64})
 
 Return approximation of maximum entrophy for given entropies 
-`entropy_constraints` characterizing `distributions_n` number of distributions.
+`entropy_constraints` characterizing distributions with given 
+`distrs_card` cardinalities.
 
 # Example
 
 TBD
 """
-function estimate_max_enthropy(ditributions_n::Int64, entropy_constraints::Dict{Vector{Int64}, Float64})::Float64
+function estimate_max_enthropy(distrs_card::Vector{Int64}, 
+                               entropy_constraints::Dict{Vector{Int64}, Float64})::Float64
+    # ℎ(∅) = 0
     entropy_constraints[[]] = 0 
-
+    
+    distributions_n = length(distrs_card)
     subset_to_index = Dict()
     subset_to_index[[]] = 1
 
@@ -72,10 +75,10 @@ function estimate_max_enthropy(ditributions_n::Int64, entropy_constraints::Dict{
 
     # non-negativity constraints
     # ℎ(𝐴) ≥ 0, ∀𝐴 ∈ 𝒫(𝑁)
-    @variable(model, h[1:(2^ditributions_n + 1)] >= 0)  
+    @variable(model, h[1:(2^distributions_n + 1)] >= 0)  
 
     # ∀𝐴 ∈ 𝒫(𝑁)
-    for subset_A in powerset(collect(1:ditributions_n), 1)  
+    for subset_A in powerset(collect(1:distributions_n), 1)  
         subset_to_index[subset_A] = length(subset_to_index) + 1 
         subset_A_index = subset_to_index[subset_A]
 
@@ -109,10 +112,17 @@ function estimate_max_enthropy(ditributions_n::Int64, entropy_constraints::Dict{
             
             @constraint(model, h[subset_intersect_index] + h[subset_union_index] <= h[subset_C_index] + h[subset_D_index])
         end
+
+        # upper bound constraints 
+        # ℎ(𝐴) ≤ 𝑙𝑜𝑔₂∣𝒳ₐ∣
+        # NOTE: For now it sets constraints for all 𝐴 ∈ 𝒫(𝑁), not 𝐴 ∈ 𝒫(𝑁)∖𝒫ₖ(𝑁)
+        cardinality = _calculate_cardinality(distrs_card, subset_A)
+        @constraint(model, h[subset_A_index] <= log(2, cardinality))
     end
     
+    
     # Maximize 𝐻(𝑋₁, 𝑋₂, …, 𝑋ₙ)
-    @objective(model, Max, h[subset_to_index[collect(1:ditributions_n)]])  
+    @objective(model, Max, h[subset_to_index[collect(1:distributions_n)]])  
     optimize!(model);
     return objective_value(model)
 end
@@ -140,6 +150,28 @@ end
 
 
 """
+    calculate_entropy(probability_table::Array{Float64})
+
+Calculates joint entropy of random variables for given `probability_table` 
+(marginal distribution probabilities).
+
+# Example
+
+TBD
+"""
+function calculate_entropy(probability_table::Array{Float64})::Float64
+    entropy = 0
+    for p in probability_table
+        if p == 0 
+            continue
+        end
+        entropy -= p * log2(p)
+    end
+    return entropy
+end 
+
+
+"""
     _reduce_prob_table(probability_table::Array{Float64}, choosen_distributions::Vector{Int64})
 
 Return probability table derived from given `probability_table` 
@@ -161,25 +193,15 @@ function _reduce_prob_table(probability_table::Array{Float64}, choosen_distribut
 end
 
 
-"""
-    calculate_entropy(probability_table::Array{Float64})
-
-Calculates joint entropy of random variables for given `probability_table` 
-(marginal distribution probabilities).
-
-# Example
-
-TBD
-"""
-function calculate_entropy(probability_table::Array{Float64})::Float64
-    entropy = 0
-    for p in probability_table
-        if p == 0 
-            continue
-        end
-        entropy -= p * log2(p)
+function _calculate_cardinality(distrs_card::Vector{<:Int64}, choosen_distributions::Vector{Int64})
+    if length(choosen_distributions) == 0
+        return 0
     end
-    return entropy
-end 
+    cardinality = 1
+    for d in choosen_distributions
+        cardinality *= distrs_card[d]
+    end
+    return cardinality
+end
 
 end
