@@ -47,7 +47,6 @@ function estimate_connected_information(to_order::Int64,
             con_inf[i] = entropies[i - 1] - entropies[i]
         end
     end
-    # @show entropies
 
     return con_inf
 end
@@ -70,25 +69,33 @@ function estimate_max_enthropy(ditributions_n::Int64, entropy_constraints::Dict{
     subset_to_index[[]] = 1
 
     model = Model(optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true))
-    @variable(model, h[1:(2^ditributions_n + 1)] >= 0)  # non-negativity constraints
 
-    for subset_A in powerset(collect(1:ditributions_n), 1)
+    # non-negativity constraints
+    # ℎ(𝐴) ≥ 0, ∀𝐴 ∈ 𝒫(𝑁)
+    @variable(model, h[1:(2^ditributions_n + 1)] >= 0)  
+
+    # ∀𝐴 ∈ 𝒫(𝑁)
+    for subset_A in powerset(collect(1:ditributions_n), 1)  
         subset_to_index[subset_A] = length(subset_to_index) + 1 
         subset_A_index = subset_to_index[subset_A]
 
         # given entropy constraints
+        # ℎ(𝐴) = ℎₚ(𝐴)
         if haskey(entropy_constraints, subset_A)
             @constraint(model, h[subset_A_index] == entropy_constraints[subset_A])
         end
 
-        # lower bound constraints
+    
+        # lower bound constraints (part of ℎ ∈ Γₙ)
+        # ℎ(𝐴) ≤ ℎ(𝐵), ∀𝐴,𝐵 ⊆ 𝑁 : 𝐴 ⊂ 𝐵
         subset_B_size = length(subset_A) - 1
         for subset_B in powerset(subset_A, subset_B_size, subset_B_size)  # subset of |subset_A| with one less element
             subset_B_index = subset_to_index[subset_B]
             @constraint(model, h[subset_B_index] <= h[subset_A_index])
         end
 
-        # upper bound constraints
+        # upper bound constraints (part of ℎ ∈ Γₙ)
+        # ℎ(𝐴) ≤ ℎ(𝐵) + ℎ(𝐴/𝐵), ∀𝐵 ⊆ 𝐴
         subset_union = subset_A
         for subset_C in powerset(subset_union, ceil(Int64, length(subset_union) / 2), length(subset_union))  # subsets with at least half of |subset_A| elements
             subset_D = setdiff(subset_union, subset_C)
@@ -104,7 +111,8 @@ function estimate_max_enthropy(ditributions_n::Int64, entropy_constraints::Dict{
         end
     end
     
-    @objective(model, Max, h[subset_to_index[collect(1:ditributions_n)]])  # H(X1, X2, ..., Xn)
+    # Maximize 𝐻(𝑋₁, 𝑋₂, …, 𝑋ₙ)
+    @objective(model, Max, h[subset_to_index[collect(1:ditributions_n)]])  
     optimize!(model);
     return objective_value(model)
 end
