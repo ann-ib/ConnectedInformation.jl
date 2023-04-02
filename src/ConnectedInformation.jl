@@ -33,12 +33,12 @@ function estimate_connected_information(to_order::Int64,
 
     # Calculate maximum entropy approximation consistent with marginals of order 1 
     cur_constraints = filter(p -> (length(first(p))) <= 1, entropy_constraints)
-    entropies[1] = estimate_max_enthropy(distrs_card, cur_constraints)
+    entropies[1] = estimate_max_enthropy(1, distrs_card, cur_constraints)
 
     # Calculate maximum entropy and connected informatoin approximations up to |to_order| order
     for i in 2:to_order
         cur_constraints = filter(p -> (length(first(p))) <= i, entropy_constraints)
-        entropies[i] = estimate_max_enthropy(distrs_card, cur_constraints)
+        entropies[i] = estimate_max_enthropy(i, distrs_card, cur_constraints)
         # Approximation is not precise, entropy with more constraints could have smaller value
         if entropies[i] > entropies[i - 1]
             con_inf[i] = 0
@@ -52,7 +52,8 @@ end
 
 
 """
-    estimate_max_enthropy(distrs_card::Vector{<:Int64}, entropy_constraints::Dict{Vector{Int64}, Float64})
+    estimate_max_enthropy(k::Int64, distrs_card::Vector{<:Int64}, 
+                          entropy_constraints::Dict{Vector{Int64}, Float64})
 
 Return approximation of maximum entrophy for given entropies 
 `entropy_constraints` characterizing distributions with given 
@@ -62,7 +63,7 @@ Return approximation of maximum entrophy for given entropies
 
 TBD
 """
-function estimate_max_enthropy(distrs_card::Vector{Int64}, 
+function estimate_max_enthropy(k::Int64, distrs_card::Vector{Int64}, 
                                entropy_constraints::Dict{Vector{Int64}, Float64})::Float64
     # ℎ(∅) = 0
     entropy_constraints[[]] = 0 
@@ -81,13 +82,6 @@ function estimate_max_enthropy(distrs_card::Vector{Int64},
     for subset_A in powerset(collect(1:distributions_n), 1)  
         subset_to_index[subset_A] = length(subset_to_index) + 1 
         subset_A_index = subset_to_index[subset_A]
-
-        # given entropy constraints
-        # ℎ(𝐴) = ℎₚ(𝐴)
-        if haskey(entropy_constraints, subset_A)
-            @constraint(model, h[subset_A_index] == entropy_constraints[subset_A])
-        end
-
     
         # lower bound constraints (part of ℎ ∈ Γₙ)
         # ℎ(𝐴) ≤ ℎ(𝐵), ∀𝐴,𝐵 ⊆ 𝑁 : 𝐴 ⊂ 𝐵
@@ -113,11 +107,20 @@ function estimate_max_enthropy(distrs_card::Vector{Int64},
             @constraint(model, h[subset_intersect_index] + h[subset_union_index] <= h[subset_C_index] + h[subset_D_index])
         end
 
+        # given entropy constraints
+        # ℎ(𝐴) = ℎₚ(𝐴), ∀𝐴 ∈ 𝒫ₖ(𝑁)
+        if length(subset_A) <= k
+            if haskey(entropy_constraints, subset_A)
+                @constraint(model, h[subset_A_index] == entropy_constraints[subset_A])
+            end
+        end
+
         # upper bound constraints 
-        # ℎ(𝐴) ≤ 𝑙𝑜𝑔₂∣𝒳ₐ∣
-        # NOTE: For now it sets constraints for all 𝐴 ∈ 𝒫(𝑁), not 𝐴 ∈ 𝒫(𝑁)∖𝒫ₖ(𝑁)
-        cardinality = _calculate_cardinality(distrs_card, subset_A)
-        @constraint(model, h[subset_A_index] <= log(2, cardinality))
+        # ℎ(𝐴) ≤ 𝑙𝑜𝑔₂∣𝒳ₐ∣, ∀𝐴 ∈ 𝒫(𝑁)∖𝒫ₖ(𝑁)
+        if length(subset_A) >= k
+            cardinality = _calculate_cardinality(distrs_card, subset_A)
+            @constraint(model, h[subset_A_index] <= log(2, cardinality))
+        end
     end
     
     
