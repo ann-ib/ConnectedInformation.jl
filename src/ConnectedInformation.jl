@@ -117,7 +117,7 @@ function estimate_max_enthropy(k::Int64, distrs_card::Vector{Int64},
 
         # upper bound constraints 
         # ℎ(𝐴) ≤ 𝑙𝑜𝑔₂∣𝒳ₐ∣, ∀𝐴 ∈ 𝒫(𝑁)∖𝒫ₖ(𝑁)
-        if length(subset_A) >= k
+        if length(subset_A) > k
             cardinality = _calculate_cardinality(distrs_card, subset_A)
             @constraint(model, h[subset_A_index] <= log(2, cardinality))
         end
