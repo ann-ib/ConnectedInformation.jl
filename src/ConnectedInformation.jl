@@ -84,15 +84,16 @@ function estimate_max_enthropy(k::Int64, distrs_card::Vector{Int64},
         subset_to_index[subset_A] = length(subset_to_index) + 1 
         subset_A_index = subset_to_index[subset_A]
     
-        # lower bound constraints (part of ℎ ∈ Γₙ)
-        # ℎ(𝐴) ≤ ℎ(𝐵), ∀𝐴,𝐵 ⊆ 𝑁 : 𝐴 ⊂ 𝐵
-        subset_B_size = length(subset_A) - 1
-        for subset_B in powerset(subset_A, subset_B_size, subset_B_size)  # subset of |subset_A| with one less element
-            subset_B_index = subset_to_index[subset_B]
-            @constraint(model, h[subset_B_index] <= h[subset_A_index])
+        # monotonicity (part of ℎ ∈ Γₙ)
+        # ℎ(𝑁) ≥ ℎ(𝑁/𝑖), ∀𝑖 ∈ 𝑁 
+        if length(subset_A) == distributions_n
+            for subset_B in powerset(subset_A, distributions_n - 1, distributions_n - 1) 
+                subset_B_index = subset_to_index[subset_B]
+                @constraint(model, h[subset_A_index] >= h[subset_B_index])
+            end
         end
 
-        # upper bound constraints (part of ℎ ∈ Γₙ)
+        # submodularity (part of ℎ ∈ Γₙ)
         # ℎ(𝐴) ≤ ℎ(𝐵) + ℎ(𝐴/𝐵), ∀𝐵 ⊆ 𝐴
         subset_union = subset_A
         for subset_C in powerset(subset_union, ceil(Int64, length(subset_union) / 2), length(subset_union))  # subsets with at least half of |subset_A| elements
