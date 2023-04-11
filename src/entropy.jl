@@ -58,6 +58,9 @@ for `choosen_distributions`.
 TBD
 """
 function _reduce_prob_table(probability_table::Array{Float64}, choosen_distributions::Vector{Int64})::Array{Float64}
+    if choosen_distributions == []
+        return []
+    end
     distributions_n = ndims(probability_table)
     if distributions_n == size(choosen_distributions)[1]
         return probability_table
