@@ -2,10 +2,10 @@ module Entropy
 
 using Combinatorics
 
-export caluclate_all_entropies, calculate_entropy
+export calculate_all_entropies, calculate_entropy
 
 """
-    caluclate_all_entropies(probability_table::Array{Float64})
+    calculate_all_entropies(probability_table::Array{Float64})
 
 Return all possible joint entropies for distributions characterized by 
 `probability_table`.
@@ -14,7 +14,7 @@ Return all possible joint entropies for distributions characterized by
 
 TBD
 """
-function caluclate_all_entropies(probability_table::Array{Float64})::Dict{Vector{Int64}, Float64}
+function calculate_all_entropies(probability_table::Array{Float64})::Dict{Vector{Int64}, Float64}
     entropies = Dict()
     distributions_n = ndims(probability_table)
     for choosen_distributions in powerset(collect(1:distributions_n))  

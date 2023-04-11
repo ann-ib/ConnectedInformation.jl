@@ -1,9 +1,9 @@
 using Test
 
-using .Entropy: caluclate_all_entropies, calculate_entropy
+using .Entropy: calculate_all_entropies, calculate_entropy
 
 @testset "entropy.jl" begin
-    @testset "caluclate_all_entropies" begin
+    @testset "calculate_all_entropies" begin
         parity = zeros(Float64, 2, 2, 2, 2)
         parity[1, 1, 1, 1] = 1/8        
         parity[1, 1, 2, 2] = 1/8
@@ -31,7 +31,7 @@ using .Entropy: caluclate_all_entropies, calculate_entropy
                                     [2, 3, 4] => 3.0,
                                     [1, 2, 3, 4] => 3.0)
 
-        @test caluclate_all_entropies(parity) == expected_entropies
+        @test calculate_all_entropies(parity) == expected_entropies
     end
 
     @testset "calculate_entropy" begin

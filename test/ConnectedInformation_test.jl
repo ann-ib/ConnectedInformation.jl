@@ -15,7 +15,7 @@ using .Entropy
             parity[2, 1, 2, 1] = 1/8
             parity[2, 2, 1, 1] = 1/8
             parity[2, 2, 2, 2] = 1/8
-            entropies = caluclate_all_entropies(parity)
+            entropies = calculate_all_entropies(parity)
             
             distr_cards = [2, 2, 2, 2]
             connected_information = estimate_connected_information(4, distr_cards, entropies)
@@ -38,7 +38,7 @@ using .Entropy
             rnd_values[:,:,4] = [0.0209961  0.0439453;
                                  0.0839844  0.0219727;
                                  0.0136719  0.0102539]
-            entropies = caluclate_all_entropies(rnd_values)
+            entropies = calculate_all_entropies(rnd_values)
             connected_information = estimate_connected_information(3, distr_cards, entropies)
             @test isnan(connected_information[1])
             # TODO: calculate real maximum value
@@ -46,12 +46,12 @@ using .Entropy
         end
     end
 
-    @testset "estimate_max_enthropy" begin
+    @testset "estimate_max_entropy" begin
         @testset "parity" begin
             distr_cards = [2, 2, 2, 2]
 
             one_dim_entropies = Dict{Vector{Int64}, Float64}([1] => 1, [2] => 1, [3] => 1, [4] => 1)
-            @test estimate_max_enthropy(1, distr_cards, one_dim_entropies) ≈ 4.0
+            @test estimate_max_entropy(1, distr_cards, one_dim_entropies) ≈ 4.0
             
             parity = zeros(Float64, 2, 2, 2, 2)
             parity[1, 1, 1, 1] = 1/8
@@ -62,8 +62,8 @@ using .Entropy
             parity[2, 1, 2, 1] = 1/8
             parity[2, 2, 1, 1] = 1/8
             parity[2, 2, 2, 2] = 1/8
-            parity_entropies = caluclate_all_entropies(parity)
-            @test estimate_max_enthropy(4, distr_cards, parity_entropies) == 3.0
+            parity_entropies = calculate_all_entropies(parity)
+            @test estimate_max_entropy(4, distr_cards, parity_entropies) == 3.0
         end
 
         @testset "random values" begin

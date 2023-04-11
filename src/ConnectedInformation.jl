@@ -5,7 +5,7 @@ using MosekTools
 using LinearAlgebra
 using Combinatorics
 
-export estimate_connected_information, estimate_max_enthropy
+export estimate_connected_information, estimate_max_entropy
 
 
 """
@@ -33,12 +33,12 @@ function estimate_connected_information(to_order::Int64,
 
     # Calculate maximum entropy approximation consistent with marginals of order 1 
     cur_constraints = filter(p -> (length(first(p))) <= 1, entropy_constraints)
-    entropies[1] = estimate_max_enthropy(1, distrs_card, cur_constraints)
+    entropies[1] = estimate_max_entropy(1, distrs_card, cur_constraints)
 
     # Calculate maximum entropy and connected informatoin approximations up to |to_order| order
     for i in 2:to_order
         cur_constraints = filter(p -> (length(first(p))) <= i, entropy_constraints)
-        entropies[i] = estimate_max_enthropy(i, distrs_card, cur_constraints)
+        entropies[i] = estimate_max_entropy(i, distrs_card, cur_constraints)
         # Approximation is not precise, entropy with more constraints could have smaller value
         if entropies[i] > entropies[i - 1]
             con_inf[i] = 0
@@ -53,7 +53,7 @@ end
 
 
 """
-    estimate_max_enthropy(k::Int64, distrs_card::Vector{<:Int64}, 
+    estimate_max_entropy(k::Int64, distrs_card::Vector{<:Int64}, 
                           entropy_constraints::Dict{Vector{Int64}, Float64})
 
 Return approximation of maximum entrophy for given entropies 
@@ -64,7 +64,7 @@ Return approximation of maximum entrophy for given entropies
 
 TBD
 """
-function estimate_max_enthropy(k::Int64, distrs_card::Vector{Int64}, 
+function estimate_max_entropy(k::Int64, distrs_card::Vector{Int64}, 
                                entropy_constraints::Dict{Vector{Int64}, Float64})::Float64
     # ℎ(∅) = 0
     entropy_constraints[[]] = 0 
