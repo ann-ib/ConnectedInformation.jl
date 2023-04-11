@@ -25,30 +25,28 @@ TBD
 function estimate_connected_information(to_order::Int64, 
                                         distrs_card::Vector{Int64}, 
                                         entropy_constraints::Dict{Vector{Int64}, Float64})::Vector{Float64}
-    # TBD: make to_order argument optional, calculate it by default from marginals dict
-
     con_inf = Vector{Float64}(undef, to_order)
-    entropies = Vector{Float64}(undef, to_order)
     con_inf[1] = NaN
+    entropies = estimate_entropies(to_order, distrs_card, entropy_constraints)
 
-    # Calculate maximum entropy approximation consistent with marginals of order 1 
-    cur_constraints = filter(p -> (length(first(p))) <= 1, entropy_constraints)
-    entropies[1] = estimate_max_entropy(1, distrs_card, cur_constraints)
-
-    # Calculate maximum entropy and connected informatoin approximations up to |to_order| order
     for i in 2:to_order
-        cur_constraints = filter(p -> (length(first(p))) <= i, entropy_constraints)
-        entropies[i] = estimate_max_entropy(i, distrs_card, cur_constraints)
         # Approximation is not precise, entropy with more constraints could have smaller value
         if entropies[i] > entropies[i - 1]
             con_inf[i] = 0
-            
         else 
             con_inf[i] = entropies[i - 1] - entropies[i]
         end
     end
 
     return con_inf
+end
+
+
+function estimate_entropies(to_order::Int64, 
+                            distrs_card::Vector{Int64}, 
+                            entropy_constraints::Dict{Vector{Int64}, Float64})::Vector{Float64}
+    entropies = [estimate_max_entropy(i, distrs_card, entropy_constraints) for i=1:to_order]
+    return entropies
 end
 
 
