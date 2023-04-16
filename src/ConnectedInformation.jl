@@ -5,29 +5,24 @@ using MosekTools
 using LinearAlgebra
 using Combinatorics
 
-export estimate_connected_information, estimate_max_entropy
+export estimate_connected_information, estimate_max_entropies, estimate_max_entropy
 
 
 """
     estimate_connected_information(to_order::Int64, 
-                                   distrs_card::Vector{Int64}, 
+                                   distr_cards::Vector{Int64}, 
                                    entropy_constraints::Dict{Vector{Int64}, Float64})
 
-Return vector with connected information approximation of order from 2 
-up to `to_order` for given entropies `entropy_constraints` characterizing
-distributions with given `distrs_card` cardinalities.
-``
-
-# Example
-
-TBD
+Return vector of connected information approximations from 1 to `to_order` order. 
+Approximations are done for the distributions characterized by 
+`entropy_constraints` and cardinalities (`distr_cards`).
 """
 function estimate_connected_information(to_order::Int64, 
-                                        distrs_card::Vector{Int64}, 
+                                        distr_cards::Vector{Int64}, 
                                         entropy_constraints::Dict{Vector{Int64}, Float64})::Vector{Float64}
     con_inf = Vector{Float64}(undef, to_order)
     con_inf[1] = NaN
-    entropies = estimate_entropies(to_order, distrs_card, entropy_constraints)
+    entropies = estimate_max_entropies(to_order, distr_cards, entropy_constraints)
 
     for i in 2:to_order
         # Approximation is not precise, entropy with more constraints could have smaller value
@@ -41,33 +36,37 @@ function estimate_connected_information(to_order::Int64,
     return con_inf
 end
 
+"""
+    estimate_max_entropy(to_order::Int64, 
+                         distr_cards::Vector{<:Int64}, 
+                         entropy_constraints::Dict{Vector{Int64}, Float64})
 
-function estimate_entropies(to_order::Int64, 
-                            distrs_card::Vector{Int64}, 
+Return vector of maximum entrophy approximations from 1 to `to_order` order. 
+Approximations are done for the distributions characterized by 
+`entropy_constraints` and cardinalities (`distr_cards`).
+"""
+function estimate_max_entropies(to_order::Int64, 
+                            distr_cards::Vector{Int64}, 
                             entropy_constraints::Dict{Vector{Int64}, Float64})::Vector{Float64}
-    entropies = [estimate_max_entropy(i, distrs_card, entropy_constraints) for i=1:to_order]
+    entropies = [estimate_max_entropy(i, distr_cards, entropy_constraints) for i=1:to_order]
     return entropies
 end
 
 
 """
-    estimate_max_entropy(k::Int64, distrs_card::Vector{<:Int64}, 
+    estimate_max_entropy(k::Int64, distr_cards::Vector{<:Int64}, 
                           entropy_constraints::Dict{Vector{Int64}, Float64})
 
-Return approximation of maximum entrophy for given entropies 
+Return maximum entrophy approximation of order k for given entropies 
 `entropy_constraints` characterizing distributions with given 
-`distrs_card` cardinalities.
-
-# Example
-
-TBD
+`distr_cards` cardinalities.
 """
-function estimate_max_entropy(k::Int64, distrs_card::Vector{Int64}, 
+function estimate_max_entropy(k::Int64, distr_cards::Vector{Int64}, 
                                entropy_constraints::Dict{Vector{Int64}, Float64})::Float64
     # ℎ(∅) = 0
     entropy_constraints[[]] = 0 
     
-    distributions_n = length(distrs_card)
+    distributions_n = length(distr_cards)
     subset_to_index = Dict()
     subset_to_index[[]] = 1
 
@@ -115,10 +114,10 @@ function estimate_max_entropy(k::Int64, distrs_card::Vector{Int64},
             end
         end
 
-        # upper bound constraints 
+        # cardinality constraints 
         # ℎ(𝐴) ≤ 𝑙𝑜𝑔₂∣𝒳ₐ∣, ∀𝐴 ∈ 𝒫(𝑁)∖𝒫ₖ(𝑁)
         if length(subset_A) > k
-            cardinality = _calculate_cardinality(distrs_card, subset_A)
+            cardinality = _calculate_cardinality(distr_cards, subset_A)
             @constraint(model, h[subset_A_index] <= log(2, cardinality))
         end
     end
@@ -131,13 +130,13 @@ function estimate_max_entropy(k::Int64, distrs_card::Vector{Int64},
 end
 
 
-function _calculate_cardinality(distrs_card::Vector{<:Int64}, choosen_distributions::Vector{Int64})
+function _calculate_cardinality(distr_cards::Vector{<:Int64}, choosen_distributions::Vector{Int64})
     if length(choosen_distributions) == 0
         return 0
     end
     cardinality = 1
     for d in choosen_distributions
-        cardinality *= distrs_card[d]
+        cardinality *= distr_cards[d]
     end
     return cardinality
 end
