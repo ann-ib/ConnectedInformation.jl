@@ -19,10 +19,12 @@ Approximations are done for the distributions characterized by
 """
 function estimate_connected_information(to_order::Int64, 
                                         distr_cards::Vector{Int64}, 
-                                        entropy_constraints::Dict{Vector{Int64}, Float64})::Vector{Float64}
+                                        entropy_constraints::Dict{Vector{Int64}, Float64};
+                                        lower_bound = false)::Vector{Float64}
     con_inf = Vector{Float64}(undef, to_order)
     con_inf[1] = NaN
-    entropies = estimate_max_entropies(to_order, distr_cards, entropy_constraints)
+    entropies = estimate_max_entropies(
+        to_order, distr_cards, entropy_constraints; lower_bound = lower_bound)
 
     for i in 2:to_order
         # Approximation is not precise, entropy with more constraints could have smaller value
@@ -47,8 +49,10 @@ Approximations are done for the distributions characterized by
 """
 function estimate_max_entropies(to_order::Int64, 
                             distr_cards::Vector{Int64}, 
-                            entropy_constraints::Dict{Vector{Int64}, Float64})::Vector{Float64}
-    entropies = [estimate_max_entropy(i, distr_cards, entropy_constraints) for i=1:to_order]
+                            entropy_constraints::Dict{Vector{Int64}, Float64};
+                            lower_bound = false)::Vector{Float64}
+    entropies = [
+        estimate_max_entropy(i, distr_cards, entropy_constraints; lower_bound = lower_bound) for i=1:to_order]
     return entropies
 end
 
@@ -62,7 +66,8 @@ Return maximum entrophy approximation of order k for given entropies
 `distr_cards` cardinalities.
 """
 function estimate_max_entropy(k::Int64, distr_cards::Vector{Int64}, 
-                               entropy_constraints::Dict{Vector{Int64}, Float64})::Float64
+                              entropy_constraints::Dict{Vector{Int64}, Float64};
+                              lower_bound = false)::Float64
     # ℎ(∅) = 0
     entropy_constraints[[]] = 0 
     
@@ -144,11 +149,12 @@ function estimate_max_entropy(k::Int64, distr_cards::Vector{Int64},
                 model, 
                 3(h[it] + h[il] + h[tl]) + h[jt] + h[jl] - h[i] - 2(h[t] + h[l]) 
                 - h[ij] - 4h[itl] - h[jtl] >= 0)
-
-            # Ingleton inequality
-            # @constraint(
-            #     model,
-            #     h[it] + h[jt] + h[il] + h[tl] - h[ij] - h[t] - h[l] - h[itl] - h[jtl] >= 0)
+            if lower_bound
+                # Ingleton inequality
+                @constraint(
+                    model,
+                    h[it] + h[jt] + h[il] + h[tl] - h[ij] - h[t] - h[l] - h[itl] - h[jtl] >= 0)
+            end
         end
     end 
     
