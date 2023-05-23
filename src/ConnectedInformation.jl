@@ -127,8 +127,8 @@ function estimate_max_entropy(k::Int64, distr_cards::Vector{Int64},
         end
     end
 
-    if k >= 4 
-        for (_i, _j, _t, _l) in permutations(collect(1:k), 4)
+    if distributions_n >= 4 
+        for (_i, _j, _t, _l) in permutations(collect(1:distributions_n), 4)
             if _i > _j || _t > _l  # dropping redundant permutations
                 continue
             end
@@ -144,16 +144,17 @@ function estimate_max_entropy(k::Int64, distr_cards::Vector{Int64},
             itl = subset_to_index[sort([_i, _t, _l])]
             jtl = subset_to_index[sort([_j, _t, _l])]
             
-            # Zhang-Yeung inequalities
-            @constraint(
-                model, 
-                3(h[it] + h[il] + h[tl]) + h[jt] + h[jl] - h[i] - 2(h[t] + h[l]) 
-                - h[ij] - 4h[itl] - h[jtl] >= 0)
             if lower_bound
                 # Ingleton inequality
                 @constraint(
                     model,
                     h[it] + h[jt] + h[il] + h[tl] - h[ij] - h[t] - h[l] - h[itl] - h[jtl] >= 0)
+            else 
+                # Zhang-Yeung inequalities
+                @constraint(
+                    model, 
+                    3(h[it] + h[il] + h[tl]) + h[jt] + h[jl] - h[i] - 2(h[t] + h[l]) 
+                    - h[ij] - 4h[itl] - h[jtl] >= 0)
             end
         end
     end 
