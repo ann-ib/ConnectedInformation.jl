@@ -5,7 +5,7 @@ using MosekTools
 using LinearAlgebra
 using Combinatorics
 
-export estimate_connected_information, estimate_max_entropies, estimate_max_entropy
+export estimate_connected_information, estimate_max_entropies, estimate_max_entropy, calculate_connected_information
 
 
 """
@@ -35,6 +35,21 @@ function estimate_connected_information(to_order::Int64,
         end
     end
 
+    return con_inf
+end
+
+function calculate_connected_information(
+    to_order::Int64, max_entropies::Vector{Float64})::Vector{Float64}
+    con_inf = Vector{Float64}(undef, to_order)
+    con_inf[1] = NaN
+    for i in 2:to_order
+        # Approximation is not precise, entropy with more constraints could have smaller value
+        if max_entropies[i] > max_entropies[i - 1]
+            con_inf[i] = 0
+        else 
+            con_inf[i] = max_entropies[i - 1] - max_entropies[i]
+        end
+    end
     return con_inf
 end
 
