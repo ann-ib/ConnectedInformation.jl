@@ -16,8 +16,6 @@ Start using the package in Julia code:
 using ConnectedInformation
 ```
 
-To update package in 
-
 ## How to run tests
 After installing the package it is possible to run tests with the `test` command:
 ```shell
