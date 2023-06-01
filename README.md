@@ -17,15 +17,15 @@ using ConnectedInformation
 ## How to run tests
 Switch to project folder and start Julia REPL from terminal using commands below
 ```shell
-> cd /path/to/project/
-> julia
+cd /path/to/project/
+julia
 ```
 
 Afterwards, in the project directory from Julia REPL invoke those commands
 ```shell
-julia> ]
-(@v1.8) pkg> activate .
-(ConnectedInformation) pkg> test
+]
+activate .
+test
 
 ```
 
