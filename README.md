@@ -2,11 +2,13 @@
 This project provides a way to compute the approximate connected information and entropy of any number of random distributions.
 
 ## Installation
-To install a version from git simply run commands below in Julia REPL
+To install a version from git simply run commands below in Julia REPL.
+> **Note**
+> Only symbols after `>` should be pasted to command line.
 
 ```shell
-]
-dev https://github.com/ann-ib/ConnectedInformation.jl.git
+julia> ]
+(@v1.8) pkg> dev https://github.com/ann-ib/ConnectedInformation.jl.git
 ```
 
 Start using the package in Julia code:
@@ -14,19 +16,12 @@ Start using the package in Julia code:
 using ConnectedInformation
 ```
 
+To update package in 
+
 ## How to run tests
-Switch to project folder and start Julia REPL from terminal using commands below
+After installing the package it is possible to run tests with the `test` command:
 ```shell
-cd /path/to/project/
-julia
-```
-
-Afterwards, in the project directory from Julia REPL invoke those commands
-```shell
-]
-activate .
-test
-
+test ConnectedInformation
 ```
 
 ## License
