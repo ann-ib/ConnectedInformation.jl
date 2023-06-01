@@ -12,7 +12,7 @@ julia> ]
 ```
 
 Start using the package in Julia code:
-```
+```julia
 using ConnectedInformation
 ```
 
@@ -21,7 +21,7 @@ To update package in
 ## How to run tests
 After installing the package it is possible to run tests with the `test` command:
 ```shell
-test ConnectedInformation
+(@v1.8) pkg> test ConnectedInformation
 ```
 
 ## License
