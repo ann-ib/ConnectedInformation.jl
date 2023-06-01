@@ -24,5 +24,11 @@ After installing the package it is possible to run tests with the `test` command
 (@v1.8) pkg> test ConnectedInformation
 ```
 
+## How to update package
+It is possible to update project with recent changes wiht the command:
+```shell
+(@v1.8) pkg> up --preserve=direct ConnectedInformation
+```
+
 ## License
 Connected Information project is released under the [MIT License](LICENSE.txt).
