@@ -2,14 +2,14 @@
 This project provides a way to compute the approximate connected information and entropy of any number of random distributions.
 
 ## Installation
-To install a version from git simply run
+To install a version from git simply run commands below in Julia REPL
 
 ```shell
-julia> ]
-(@v1.8) pkg> dev https://github.com/ann-ib/ConnectedInformation.jl.git
+]
+dev https://github.com/ann-ib/ConnectedInformation.jl.git
 ```
 
-Start using the package:
+Start using the package in Julia code:
 ```
 using ConnectedInformation
 ```
