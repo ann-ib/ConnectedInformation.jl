@@ -136,10 +136,10 @@ function estimate_max_entropy(k::Int64, distr_cards::Vector{Int64},
 
         # cardinality constraints 
         # ℎ(𝐴) ≤ 𝑙𝑜𝑔₂∣𝒳ₐ∣, ∀𝐴 ∈ 𝒫(𝑁)∖𝒫ₖ(𝑁)
-        if length(subset_A) > k
-            cardinality = _calculate_cardinality(distr_cards, subset_A)
-            @constraint(model, h[subset_A_index] <= log(2, cardinality))
-        end
+        # if length(subset_A) > k
+        #     cardinality = _calculate_cardinality(distr_cards, subset_A)
+        #     @constraint(model, h[subset_A_index] <= log(2, cardinality))
+        # end
     end
 
     if distributions_n >= 4 
