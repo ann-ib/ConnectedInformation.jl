@@ -144,7 +144,7 @@ function estimate_max_entropy(k::Int64, distr_cards::Vector{Int64},
 
     if distributions_n >= 4 
         for (_i, _j, _t, _l) in permutations(collect(1:distributions_n), 4)
-            if _i > _j || _t > _l  # dropping redundant permutations
+            if _i > _j  # dropping redundant permutations
                 continue
             end
             i = subset_to_index[[_i]]
