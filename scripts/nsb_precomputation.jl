@@ -23,6 +23,24 @@ data = dmn_data
 
 discretized_data = discretize_data(data, variables_n, bins_n, false)
 
-entropies = calc_nsb_entropies(discretized_data, bins_n, variables_n)
+nsb_entropies = calc_nsb_entropies(discretized_data, bins_n, variables_n)
 
-print(entropies)
+max_entropies = estimate_max_entropies(
+    variables_n, [bins_n for i=1:variables_n], nsb_entropies)
+
+# Wrtie
+# filename = "dmn_diskretized_nsb_$(bins_n)"
+
+# matwrite(
+#     "resources/$(filename).mat",
+#     Dict(
+#         "discretized_data" => discretized_data,
+#         "nsb_entropies" => nsb_entropies,
+#         "max_entropies" => max_entropies))
+
+# serialize(
+#     "resources/$(filename).ser",
+#     Dict(
+#         "discretized_data" => discretized_data,
+#         "nsb_entropies" => nsb_entropies,
+#         "max_entropies" => max_entropies))
