@@ -28,5 +28,12 @@ It is possible to update the project with recent changes with the command:
 (@v1.8) pkg> up --preserve=direct ConnectedInformation
 ```
 
+## How to run scripts
+To run `.jl` files from the `/scripts` folder:
+```shell
+(@v1.8) pkg> activate .
+julia> includet("scripts/script_name.jl")
+```
+
 ## License
 Connected Information project is released under the [MIT License](LICENSE.txt).
