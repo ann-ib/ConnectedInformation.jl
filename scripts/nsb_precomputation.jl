@@ -1,4 +1,5 @@
 using MAT
+using Serialization
 
 include("../src/ConnectedInformation.jl")
 include("../src/helpers.jl")
@@ -6,7 +7,7 @@ include("../src/nsb_helpers.jl")
 
 using Revise
 
-import .ConnectedInformation
+import .ConnectedInformation: estimate_max_entropies
 import .Helpers: discretize_data
 import .NSBHelpers: calc_nsb_entropies
 
