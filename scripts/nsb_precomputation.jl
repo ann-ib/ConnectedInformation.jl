@@ -7,9 +7,9 @@ include("../src/nsb_helpers.jl")
 
 using Revise
 
-import .ConnectedInformation: estimate_max_entropies
+import .ConnectedInformation: estimate_max_entropies, estimate_connected_information
 import .Helpers: discretize_data
-import .NSBHelpers: calc_nsb_entropies
+import .NSBHelpers: calc_nsb_entropies_single
 
 # Read data
 vars = matread("resources/connectivities_estimates_withsurr_twoAALnets.mat")
@@ -24,24 +24,32 @@ data = dmn_data
 
 discretized_data = discretize_data(data, variables_n, bins_n, false)
 
-nsb_entropies = calc_nsb_entropies(discretized_data, bins_n, variables_n)
+nsb_entropies = calc_nsb_entropies_single(discretized_data, bins_n, variables_n)
 
+# Claculate approximations
+distr_cards = [bins_n for i=1:variables_n]
+@show "Calculating max entropies"
 max_entropies = estimate_max_entropies(
-    variables_n, [bins_n for i=1:variables_n], nsb_entropies)
+    variables_n, distr_cards, nsb_entropies)
+@show "Calculating connected information"
+connected_information = estimate_connected_information(
+    variables_n, distr_cards, nsb_entropies)
+
 
 # Wrtie
-# filename = "dmn_diskretized_nsb_$(bins_n)"
+filename = "dmn_diskretized_nsb_$(bins_n)"
 
-# matwrite(
-#     "resources/$(filename).mat",
-#     Dict(
-#         "discretized_data" => discretized_data,
-#         "nsb_entropies" => nsb_entropies,
-#         "max_entropies" => max_entropies))
+matwrite(
+    "resources/$(filename).mat",
+    Dict(
+        "discretized_data" => discretized_data,
+        "max_entropies" => max_entropies,
+        "connected_information" => connected_information))
 
-# serialize(
-#     "resources/$(filename).ser",
-#     Dict(
-#         "discretized_data" => discretized_data,
-#         "nsb_entropies" => nsb_entropies,
-#         "max_entropies" => max_entropies))
+serialize(
+    "resources/$(filename).ser",
+    Dict(
+        "discretized_data" => discretized_data,
+        "nsb_entropies" => nsb_entropies,
+        "max_entropies" => max_entropies,
+        "connected_information" => connected_information))

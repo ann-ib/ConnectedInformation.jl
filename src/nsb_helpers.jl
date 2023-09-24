@@ -2,11 +2,11 @@ module NSBHelpers
 
 using Combinatorics
 
-export calc_nsb_entropies
+export calc_nsb_entropies_single
 
 nsb_path = abspath("src/nsb_octave")
 
-function _call_nsb_octave(data)
+function _call_nsb_octave(data)::Float64
     print("Call with $data.\n")
     K = length(data)
     nx = data[data .> 0]
@@ -37,7 +37,7 @@ function _serialize_data(disc_data_table, choosen_variables)
     return vec(cur_table)
 end
 
-function calc_nsb_entropies(disc_data, bins_n, variables_n)
+function calc_nsb_entropies_single(disc_data, bins_n, variables_n)::Dict{Vector{Int64}, Float64}
     entropies = Dict()
     entropies[[]] = 0
     data_size = size(disc_data, 1)
@@ -56,9 +56,10 @@ function calc_nsb_entropies(disc_data, bins_n, variables_n)
         nsb_serialized_data = _serialize_data(disc_data_table, choosen_variables)
         if !haskey(mem, nsb_serialized_data)
             entropy = _call_nsb_octave(nsb_serialized_data)
-            entropies[choosen_variables] = entropy
-            mem[nsb_serialized_data] = entropy
+            bin_entropy = entropy * log2(ℯ)
+            mem[nsb_serialized_data] = bin_entropy
         end
+        entropies[choosen_variables] = mem[nsb_serialized_data]
     end
     return entropies
 end
