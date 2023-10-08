@@ -43,7 +43,7 @@ function dxi = dxi_KB (K, B)
   %% See the GNU General Public License for more details.
 
 
-  if ((all(size(K)==size(B))) | (length(K)==1) | (length(B)==1)) 
+  if ((all(size(K)==size(B))) || (length(K)==1) || (length(B)==1)) 
     dxi=polygamma(1, B+1) - 1./K.*polygamma(1, 1+B./K);
   else
     error('Dimensions of K and B mismatch.');

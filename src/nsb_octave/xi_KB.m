@@ -41,7 +41,7 @@ function xi = xi_KB (K, B)
   %% warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   %% See the GNU General Public License for more details.
 
-  if ((all(size(K)==size(B))) | (length(K)==1) | (length(B)==1))   
+  if ((all(size(K)==size(B))) || (length(K)==1) || (length(B)==1))   
     xi=psi(B+1) - psi(1+B./K);
   else
     error('Dimensions of K and B mismatch.');

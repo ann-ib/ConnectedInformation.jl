@@ -188,7 +188,7 @@ tol1=int;
 wfuntxt= int2str(wfun);% weightfunction used
 wtxt=[int2str(gn),'_',wfuntxt];% weightfunction used
 eval(['global cb',wtxt,' cw',wtxt,';']);
-if isempty(eval(['cb',wtxt]))|FindWeigths ,  
+if isempty(eval(['cb',wtxt]))||FindWeigths ,  
   % calculate the weights if necessary
   eval(['[cb',wtxt,',cw',wtxt,']=qrule(gn,wfun,alpha1,beta1);']);
 end
@@ -252,7 +252,7 @@ for i=1:10,
  % gntxt=int2str(gn);% # of weights
   wtxt=[int2str(gn),'_',wfuntxt];
   eval(['global cb',wtxt,' cw',wtxt]);
-  if isempty(eval(['cb',wtxt]))|FindWeigths ,  
+  if isempty(eval(['cb',wtxt]))||FindWeigths ,  
     % calculate the weights if necessary
     eval(['[cb',wtxt,',cw',wtxt,']=qrule(gn,wfun,alpha1,beta1);']);
   end

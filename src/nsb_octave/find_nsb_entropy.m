@@ -122,7 +122,7 @@ function [S_nsb, dS_nsb, S_cl, dS_cl, xi_cl, S_ml, errcode] = ...
     quad_options('rel',precision);
   end
 
-  if((errcode==1) | (errcode==2) | (errcode==3) | (errcode==4))
+  if((errcode==1) || (errcode==2) || (errcode==3) || (errcode==4))
     % if no coincidences, or no covergence in NR polishing,
     % or bad power-series expansion results
     disp(['  FIND_NSB_ENTROPY: Switching to integration over the full range of xi due to ' ...

@@ -253,7 +253,7 @@ function [Bcl, xicl, dxi, errcode] = max_evidence(kx, nx, K, precision)
              int2str(counter) ' iterations.']);
     end;
 
-    if ((errcode == 3) & (counter<=maxcounter))
+    if ((errcode == 3) && (counter<=maxcounter))
       % earlier problem with NR integration for B0
       % was overcome in integration for maxcounter
       disp(['success: MAX_EVIDENCE: Recovered from previous errors ' ...

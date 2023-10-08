@@ -1,8 +1,9 @@
 module NSBHelpers
 
 using Combinatorics
+using MAT
 
-export calc_nsb_entropies_single
+export calc_nsb_entropies_single, calc_nsb_entropies_bulk
 
 nsb_path = abspath("src/nsb_octave")
 
@@ -64,4 +65,36 @@ function calc_nsb_entropies_single(disc_data, bins_n, variables_n)::Dict{Vector{
     return entropies
 end
 
+function _call_nsb_octave_bulk(disc_data, bins_n, variables_n)::Dict{Vector{Int64}, Float64}
+    in_filename = "tmp/nsb_discretized_data.mat"
+    out_filename = "tmp/nsb_all_entropies.mat"
+
+    matwrite(
+        in_filename,
+        Dict(
+            "disc_data" => disc_data))
+
+    print("Call bulk.\n")
+    run(pipeline(
+        `octave --eval "warning('off','all');
+                        addpath('$nsb_path'); 
+                        entropies = find_all_nsb_entropies('$in_filename', '$out_filename', $bins_n, $variables_n);"`,
+        stdout=devnull))
+
+    nsb_entropies = matread(out_filename)["entropies"]
+    entropies = Dict()
+    entropies[[]] = 0
+    for (key, value) in nsb_entropies
+        variables = map(x -> parse(Int64, x), split(key))
+        entropies[variables] = value * log2(ℯ)
+    end
+
+    return entropies
+end
+
+
+function calc_nsb_entropies_bulk(disc_data, bins_n, variables_n)::Dict{Vector{Int64}, Float64}
+    entropies = _call_nsb_octave_bulk(disc_data, bins_n, variables_n)
+    return entropies
+end
 end
